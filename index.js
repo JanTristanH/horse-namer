@@ -10,12 +10,14 @@ const config = {
         "Geschenk",
         "Überrumpelung",
         "Verwunderung"],
-    desiredStartingString: "M"
+    desiredStartingString: "M",
+    //hostUrl: "https://libretranslate.com"
+    hostUrl: "http://localhost:5000"
 }
 
 let getTranslation = (source, target, str) => {
     return new Promise(async (resolve, rej) => {
-        const res = await fetch("http://localhost:5000/translate", {
+        const res = await fetch(config.hostUrl + "/translate", {
             method: "POST",
             body: JSON.stringify({
                 q: str,
@@ -29,12 +31,13 @@ let getTranslation = (source, target, str) => {
         result.source = source;
         result.target = target;
         result.originalText = str;
+        if (result.error) rej(res);
         resolve(result);
     });
 }
 
 let getAllLanguages = async () => {
-    const res = await fetch("http://localhost:5000//languages");
+    const res = await fetch(config.hostUrl + "/languages");
     return await res.json();
 }
 
@@ -45,10 +48,10 @@ let generateResult = (config, languages) => {
         Promise.all(languages.map(l => getTranslation(config.sourceLanguageCode, l.code, currStr)))
             .then(r => {
                 //console.debug(r);
-                let filtered = r.filter(s => { 
+                let filtered = r.filter(s => {
                     debugger
                     return s.translatedText.toLowerCase().startsWith(config.desiredStartingString.toLowerCase())
-                 });
+                });
                 console.log("--------------------------------------------------");
                 console.log(filtered);
             })
